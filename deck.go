@@ -173,6 +173,16 @@ func emulateClipboard(text string) {
 	emulateKeyPress("29-47") // ctrl-v
 }
 
+func emulateSubmitClipboard(text string) {
+	err := clipboard.WriteAll(text)
+	if err != nil {
+		fatalf("Pasting to clipboard failed: %s\n", err)
+	}
+
+	// paste the string
+	emulateKeyPresses("Leftctrl-V+100 / Enter")
+}
+
 // executes a dbus method.
 func executeDBusMethod(object, path, method, args string) {
 	call := dbusConn.Object(object, dbus.ObjectPath(path)).Call(method, 0, args)
@@ -231,6 +241,10 @@ func (d *Deck) triggerAction(dev *streamdeck.Device, index uint8, hold bool) {
 				if a.Paste != "" {
 					emulateClipboard(a.Paste)
 				}
+				if a.SubmitPaste != "" {
+					emulateSubmitClipboard(a.SubmitPaste)
+				}
+
 				if a.DBus.Method != "" {
 					executeDBusMethod(a.DBus.Object, a.DBus.Path, a.DBus.Method, a.DBus.Value)
 				}
